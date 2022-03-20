@@ -3,9 +3,21 @@ from django.shortcuts import render
 from vivanda_web.conexion import conexion
 from utils import clases
 
+
 # Create your views here.
 def index(request):
-    nombre_producto = request.GET.get('productos_buscar')
+    nombre_producto=''
+    if "busqueda" in request.session.keys():
+        for key, value in request.session.get("busqueda").items():
+            nombre_producto = value["nombre_producto"]
+    if request.GET.get('productos_buscar'):
+        nombre_producto = request.GET.get('productos_buscar')
+        busqueda = clases.Busqueda(request)
+        busqueda.agregar(nombre_producto)
+    elif request.GET.get('productos_buscar') == '':
+        nombre_producto = ''
+        busqueda = clases.Busqueda(request)
+        busqueda.eliminar()
     conexion
     try:
         with conexion.cursor() as cursor:
@@ -17,10 +29,12 @@ def index(request):
                 categorias.append(clases.Categoria(categoria_sql))
             # OBTENER PRODUCTOS
             if nombre_producto:
-                cursor.execute(f'''SELECT * 
+                busqueda = clases.Busqueda(request)
+                busqueda.agregar(nombre_producto)
+                cursor.execute('''SELECT * 
                             FROM Producto 
-                            WHERE unaccent(nombre_producto) ILIKE unaccent('%{nombre_producto}%');
-                            ''')
+                            WHERE unaccent(nombre_producto) ILIKE unaccent('%{}%');
+                            '''.format(nombre_producto))
             else:
                 cursor.execute('SELECT p.* FROM Producto as p;')
                 nombre_producto = ""
@@ -44,7 +58,7 @@ def index(request):
                             if categoryAux == categoria.id_categoria:
                                 arrProductos[count][categoryAux].append(producto)
                             count += 1
-            return render(request, 'productos/index.html',{'categorias': categorias, 'productos': arrProductos, 'busqueda':nombre_producto})
+            return render(request, 'productos/index.html',{'categorias': categorias, 'productos': arrProductos})
     except Exception as e:
         return HttpResponse('Ocurrio un error: %s' % (e,))
 

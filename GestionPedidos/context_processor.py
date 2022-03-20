@@ -3,6 +3,7 @@ def cart_total_amount(request):
     subtotal = 0.0
     descuento = 0.0
     total = 0.0
+    busqueda=''
     if "carrito" in request.session.keys():
         for key, value in request.session.get("carrito").items():
             subtotal += (value["precio"]*value['cantidad'])
@@ -11,4 +12,7 @@ def cart_total_amount(request):
             descuento = round(descuento, 2)
         total = subtotal-descuento
         total = round(total, 2)
-    return {"cart_total_amount": subtotal, "descuento": descuento, "total": total}
+    if "busqueda" in request.session.keys():
+        for key, value in request.session.get("busqueda").items():
+            busqueda = value["nombre_producto"]
+    return {"cart_total_amount": subtotal, "descuento": descuento, "total": total, "busqueda": busqueda}

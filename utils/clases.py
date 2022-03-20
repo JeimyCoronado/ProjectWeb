@@ -1,5 +1,6 @@
 import json
 from decimal import Decimal
+from msilib.schema import Class
 
 # CLASE PARA FORMATEAR LOS REGISTROS OBTENIDOS POR LA 
 # TABLA Categoria DE LA BASE DE DATOS
@@ -110,3 +111,35 @@ class Carrito:
     def limpiar(self):
         self.session["carrito"] = {}
         self.session.modified = True
+
+
+class Busqueda:
+    def __init__(self, request):
+        self.request = request
+        self.session = request.session
+        busqueda = self.session.get("busqueda")
+        if not busqueda:
+            busqueda = self.session["busqueda"] = {}
+        self.busqueda = busqueda
+    
+    def agregar(self, busqueda):
+        if busqueda not in self.busqueda.keys():
+            self.busqueda['1']={
+                "nombre_producto": busqueda
+            }
+        else:
+            self.session["busqueda"] = {}
+            self.session.modified = True
+            self.busqueda['1']={
+                "nombre_producto": busqueda
+            }
+        self.guardar_busqueda()
+
+
+    def guardar_busqueda(self):
+        self.session["busqueda"] = self.busqueda
+        self.session.modified = True
+
+    def eliminar(self):        
+        del self.busqueda['1']
+        self.guardar_busqueda()
