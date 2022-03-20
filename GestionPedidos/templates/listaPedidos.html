@@ -12,6 +12,9 @@
     thead {
         background-color: yellow;
     }
+    a{
+        margin-left: 20px;
+    }
 </style>
 <body>
     <table>
@@ -21,6 +24,7 @@
                 <td><p>Fecha de Pedido</p></td>
                 <td><p>Hora de Pedido</p></td>
                 <td><p>Monto Total</p></td>
+                <td><p>Detalle de Pedido</p></td>
             </tr>
             
         </thead>
@@ -30,9 +34,17 @@
                     {% for dato in pedido %}
                     <td><p>{{dato}}</p></td>
                     {% endfor %}
+                    <td><form action="/detallePedido/{{pedido.0}}">
+                        <button>Ver detalle</button>
+                    </form></td>
+                    
                 </tr>
             {% endfor %}
         </tbody>
     </table>
+    <br>
+    <form action="/salir">
+        <button>Cerrar Sesión</button>
+    </form>
 </body>
 </html>

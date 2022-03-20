@@ -1,9 +1,7 @@
-
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 import time
 
-from django.urls import reverse
 # Create your views here.
 from utils.clases import Carrito, Busqueda
 from GestionPedidos.models import Producto, Promocion
@@ -23,14 +21,6 @@ def add_product(request, sku):
 
     return redirect('productos:index')
     
-    
-
-def remove_product(request, sku):
-    cart = Carrito(request)
-    product = get_object_or_404(Producto, pk=sku)
-    cart.eliminar(product)
-    return redirect("listado_productos")
-
 
 def decrement_product(request, sku):
     cart = Carrito(request)
@@ -39,14 +29,28 @@ def decrement_product(request, sku):
     return redirect('productos:index')
 
 
-def clear_cart(request):
-    cart = Carrito(request)
-    cart.limpiar()
-    return redirect("listado_productos")
-
-
 def principal(request):
-    return render(request, 'principalProducto.html', {'bebida': 'liquor'})
+    total = 0
+    try:
+        with conexion:
+            with conexion.cursor() as cursor:
+                cursor.execute('''SELECT PE.ID_PEDIDO, PE.FECHA_CREACION_PEDIDO, PE.HORA_CREACION_PEDIDO, 
+                                OP.COD_PRODUCTO,P.NOMBRE_PRODUCTO, OP.PRECIO_UNITARIO, OP.CANTIDAD, 
+                                OP.DESCUENTO, TRUNC((OP.PRECIO_UNITARIO*OP.CANTIDAD)-OP.DESCUENTO,2)
+                                FROM PEDIDO PE, ORDEN_PEDIDO OP, PRODUCTO P
+                                WHERE PE.ID_PEDIDO=OP.ID_PEDIDO AND OP.COD_PRODUCTO=P.COD_PRODUCTO
+                                AND PE.ID_PEDIDO=cast(currval('SEQ01') as varchar);''')
+                registro = cursor.fetchall()
+                if registro:
+                    for dato in registro:
+                        total += dato[5]*dato[6]-dato[7]
+                    return render(request, 'principalProducto.html', {'registro': registro, 'total': total})
+                else:
+                    return HttpResponse('error')
+    except Exception as e:
+        return HttpResponse(e)
+    
+    
 
 
 def listado_productos(request):
@@ -77,19 +81,44 @@ def finalizar(request):
 
 
 def listaPedidos(request):
+    client = Cliente(request)
+    for key1, value1 in request.session.get("cliente").items():
+        id_usuario = value1["id_usuario"]
     try:
         with conexion:
             with conexion.cursor() as cursor:
                 cursor.execute('''SELECT PE.ID_PEDIDO, PE.FECHA_CREACION_PEDIDO, PE.HORA_CREACION_PEDIDO, 
                                 SUM(TRUNC((OP.PRECIO_UNITARIO*OP.CANTIDAD)-OP.DESCUENTO,2))
                                 FROM PEDIDO PE, ORDEN_PEDIDO OP
-                                WHERE PE.ID_PEDIDO=OP.ID_PEDIDO
+                                WHERE PE.ID_PEDIDO=OP.ID_PEDIDO AND PE.ID_USUARIO='%s'
                                 GROUP BY PE.ID_PEDIDO,PE.FECHA_CREACION_PEDIDO
-                                ORDER BY PE.FECHA_CREACION_PEDIDO, PE.HORA_CREACION_PEDIDO;''')
+                                ORDER BY PE.FECHA_CREACION_PEDIDO, PE.HORA_CREACION_PEDIDO;''' %(id_usuario,))
                 registro = cursor.fetchall()
                 if registro:
                     return render(request, 'listaPedidos.html', {'registro': registro})
                 else:
                     return HttpResponse('No hay pedidos')
+    except Exception as e:
+        return HttpResponse('error: %' %(e,))
+
+
+def detallePedido(request, id_pedido):
+    total=0
+    try:
+        with conexion:
+            with conexion.cursor() as cursor:
+                cursor.execute('''SELECT PE.ID_PEDIDO, PE.FECHA_CREACION_PEDIDO, PE.HORA_CREACION_PEDIDO, 
+                                OP.COD_PRODUCTO,P.NOMBRE_PRODUCTO, OP.PRECIO_UNITARIO, OP.CANTIDAD, 
+                                OP.DESCUENTO, TRUNC((OP.PRECIO_UNITARIO*OP.CANTIDAD)-OP.DESCUENTO,2)
+                                FROM PEDIDO PE, ORDEN_PEDIDO OP, PRODUCTO P
+                                WHERE PE.ID_PEDIDO=OP.ID_PEDIDO AND OP.COD_PRODUCTO=P.COD_PRODUCTO
+                                AND PE.ID_PEDIDO='%s';''' %(id_pedido, ))
+                registro = cursor.fetchall()
+                if registro:
+                    for dato in registro:
+                        total += dato[8]
+                    return render(request, 'detallePedido.html', {'registro': registro, 'total': total})
+                else:
+                    return HttpResponse('Error')
     except Exception as e:
         return HttpResponse('error: %' %(e,))

@@ -2,8 +2,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Productos</title>
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+    <title>Detalle de Pedido</title>
 </head>
 <style>
     table,td {
@@ -23,7 +22,6 @@
     }
 </style>
 <body>
-    <p>Pedido registrado</p>
     <table class="tabla1">
         <tr>
             <td>Id de Pedido: {{registro.0.0}}</td>
@@ -43,10 +41,10 @@
             <tr>
                 <td><p>Código de Producto</p></td>
                 <td><p>Nombre de Producto</p></td>
-                <td><p>Precio unitario (S/)</p></td>
-                <td><p>Cantidad (S/)</p></td>
-                <td><p>Descuento (S/)</p></td>
-                <td><p>Subtotal (S/)</p></td>
+                <td><p>Precio unitario</p></td>
+                <td><p>Cantidad</p></td>
+                <td><p>Descuento</p></td>
+                <td><p>Subtotal</p></td>
             </tr>
             
         </thead>
@@ -64,11 +62,6 @@
         </tbody>
     </table>
     <br>
-    <form action="/listaPedidos">
-        <button>Ver Pedidos realizados</button>
-    </form><br><br>
-    <form action="/salir">
-        <button>Cerrar Sesión</button>
-    </form>
+    <a href="/listaPedidos">Volver</a>
 </body>
 </html>

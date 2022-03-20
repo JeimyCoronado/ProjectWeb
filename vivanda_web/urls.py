@@ -17,8 +17,8 @@ from django.contrib import admin
 from django.urls import path, include
 from django.views.generic.base import TemplateView
 
-from GestionPedidos.views import principal, listado_productos, add_product, remove_product, decrement_product, \
-    clear_cart, finalizar, listaPedidos
+from GestionPedidos.views import principal, listado_productos, add_product, decrement_product, \
+    finalizar, listaPedidos, detallePedido
 from GestionUsuarios.views import loginCliente, loginEmpleado, registrarEmpleado, registrarCliente, confirmacion, \
     recuperacion, recuperaEmpleado, salirSesion
 
@@ -37,10 +37,9 @@ urlpatterns = [
     path('recuperaEmpleado/', recuperaEmpleado),
     path('listado_producto', listado_productos, name='listado_productos'),
     path('agregar/<sku>', add_product, name='Add'),
-    path('eliminar/<sku>', remove_product, name='Del'),
     path('restar/<sku>', decrement_product, name='Sub'),
-    path('limpiar/', clear_cart, name='CLS'),
     path('finalizar/', finalizar, name='finalizar'),
     path('salir/', salirSesion),
-    path('listaPedidos/', listaPedidos)
+    path('listaPedidos/', listaPedidos),
+    path('detallePedido/<id_pedido>',detallePedido)
 ]

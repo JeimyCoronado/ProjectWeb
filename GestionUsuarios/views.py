@@ -81,7 +81,7 @@ def loginEmpleado(request):
                     if registro:
                         if registro[0][1]:
                             if check_password_hash(registro[0][1], contrasena):
-                                return redirect('index')
+                                return HttpResponse('Bienvenido a Vivanda')
                             else:
                                 return render(request, 'loginEmpleado.html', {'invalido': 'Contraseña incorrecta'})
                         else:
@@ -121,7 +121,7 @@ def registrarEmpleado(request):
             with conexion:
                 with conexion.cursor() as cursor:
                     cursor.execute("UPDATE USUARIO SET password=%s WHERE id_usuario=%s;",(contrasena1, codigo_empleado))
-                    return redirect('index')
+                    return redirect('Bienvenido a Vivanda')
         except Exception as e:
             return HttpResponse('Ocurrio un error: %s' %(e,))
     else:
@@ -204,10 +204,12 @@ def confirmacion(request):
                         with conexion:
                             with conexion.cursor() as cursor1:
                                 cursor1.execute("UPDATE cliente SET estado='A' WHERE id_cliente=%s", (registro[0],))
-
+                        usur = Cliente(request)
+                        usur.agregar_cliente(str(registro[0][0]))
         except Exception as e:
             return HttpResponse('Ocurrio un error: %s' % (e,))
-        return redirect('index')
+        
+        return redirect('/productos')
 
 
 def recuperacion(request):
