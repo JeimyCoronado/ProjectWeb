@@ -13,6 +13,7 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+
 from django.contrib import admin
 from django.urls import path, include
 from django.views.generic.base import TemplateView
@@ -21,7 +22,7 @@ from GestionPedidos.views import principal, listado_productos, add_product, decr
     finalizar, listaPedidos, detallePedido
 from GestionUsuarios.views import loginCliente, loginEmpleado, registrarEmpleado, registrarCliente, confirmacion, \
     recuperacion, recuperaEmpleado, salirSesion
-
+from payments.views import pago
 
 urlpatterns = [
     path('', TemplateView.as_view(template_name='home.html'), name='home'),
@@ -41,5 +42,6 @@ urlpatterns = [
     path('finalizar/', finalizar, name='finalizar'),
     path('salir/', salirSesion),
     path('listaPedidos/', listaPedidos),
-    path('detallePedido/<id_pedido>',detallePedido)
+    path('detallePedido/<id_pedido>',detallePedido),
+    path('payments/', pago, name='payments'),
 ]

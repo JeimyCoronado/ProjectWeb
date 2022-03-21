@@ -41,12 +41,10 @@ def principal(request):
                                 WHERE PE.ID_PEDIDO=OP.ID_PEDIDO AND OP.COD_PRODUCTO=P.COD_PRODUCTO
                                 AND PE.ID_PEDIDO=cast(currval('SEQ01') as varchar);''')
                 registro = cursor.fetchall()
-                if registro:
-                    for dato in registro:
-                        total += dato[5]*dato[6]-dato[7]
-                    return render(request, 'principalProducto.html', {'registro': registro, 'total': total})
-                else:
-                    return HttpResponse('error')
+                #if registro:
+                for dato in registro:
+                    total += dato[5]*dato[6]-dato[7]
+                return render(request, 'principalProducto.html', {'registro': registro, 'total': total})
     except Exception as e:
         return HttpResponse(e)
     
@@ -61,14 +59,13 @@ def listado_productos(request):
 def finalizar(request):
     cart = Carrito(request)
     client = Cliente(request)
-    
     inserts = ''
     try:
         with conexion:
             with conexion.cursor() as cursor:
                 for key1, value1 in request.session.get("cliente").items():
-                    inserts = '''INSERT INTO pedido (id_pedido,fecha_creacion_pedido,hora_creacion_pedido,id_usuario) 
-                                    VALUES (nextval('SEQ01'),to_date('%s','MM/DD/YY'),'%s','%s');''' %(time.strftime('%x'),time.strftime('%X'),value1["id_usuario"])
+                    inserts = '''INSERT INTO pedido (id_pedido,fecha_creacion_pedido,hora_creacion_pedido,nro_factura,id_usuario) 
+                                    VALUES (nextval('SEQ01'),to_date('%s','MM/DD/YY'),'%s',currval('SEQ01'),'%s');''' %(time.strftime('%x'),time.strftime('%X'),value1["id_usuario"])
                     for key, value in request.session.get("carrito").items():
                         inserts += '''INSERT INTO orden_pedido (id_pedido,cod_producto,cantidad,precio_unitario,descuento)
                                     VALUES (currval('SEQ01'),'%s',%s,%s,%s);''' %(value["producto_id"],value["cantidad"],value["precio"],value["descuento"])
